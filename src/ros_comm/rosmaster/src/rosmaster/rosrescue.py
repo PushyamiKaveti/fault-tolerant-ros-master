@@ -190,6 +190,7 @@ class RosRescue(object):
                             live_nodes = self.get_live_nodes(v)
                         else :
                             self.recover_master(k , v, live_nodes)
+            self.saveState()
         return
 
 
