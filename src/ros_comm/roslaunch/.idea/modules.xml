@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/roslaunch.iml" filepath="$PROJECT_DIR$/.idea/roslaunch.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../rosmaster/.idea/rosmaster.iml" filepath="$PROJECT_DIR$/../rosmaster/.idea/rosmaster.iml" />
+    </modules>
+  </component>
+</project>
