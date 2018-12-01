@@ -1,0 +1,8 @@
+#!/usr/bin/env python
+
+#Pushyami Kaveti : ros master discovery and restart signal
+
+import rosmaster
+from rosmaster.master_discoverer import ros_moniter_main
+
+ros_moniter_main()
