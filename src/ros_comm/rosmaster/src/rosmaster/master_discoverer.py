@@ -6,6 +6,8 @@ import threading
 import rosgraph
 import subprocess
 import socket
+import optparse
+import sys
 
 from rospy.core import xmlrpcapi
 try:
@@ -18,6 +20,7 @@ MASTER_CHECK_INTERVAL = 1.0
 #rosmaster params
 NUM_WORKERS=3
 PORT = 11311
+RESCUE = '--rescue'
 
 
 def get_master_uri():
@@ -29,6 +32,8 @@ def get_master_uri():
     hostname = socket.gethostname()
     if hostname and uri and not hostname == 'localhost' and 'localhost' in uri:
         return 'http://%s:%s/' % (hostname, PORT)
+    else :
+        return uri
 
 #code taken from rospy module. used here for convenience
 def get_master_xmlrpcapi(uri):
@@ -43,10 +48,15 @@ def get_port(url):
 
 class RosMasterMonitor(object):
 
-    def __init__(self, interval):
+    def __init__(self, interval, rescue):
+        global RESCUE
         self.CHECK_INTERVAL = interval
         self.master_uri = get_master_uri()
         self._master = get_master_xmlrpcapi(self.master_uri)
+        if rescue :
+            RESCUE = "--rescue"
+        else :
+            RESCUE = ""
         # timer to check for the ros master
         self.discoverThread = threading.Timer(interval, self.discover_master)
 
@@ -71,7 +81,7 @@ class RosMasterMonitor(object):
     def restart_rosmaster(self):
         package = 'rosmaster'
         port = get_port(self.master_uri)
-        args = [package, '--core', '-p', str(port), '-w', str(NUM_WORKERS), '--rescue']
+        args = [package, '--core', '-p', str(port), '-w', str(NUM_WORKERS), RESCUE]
         try:
             popen = subprocess.Popen(args, close_fds=True, preexec_fn=os.setsid)
         except OSError as e:
@@ -104,11 +114,21 @@ class RosMasterMonitor(object):
             self.discoverThread.start()
 
 
-def ros_moniter_main():
+def ros_moniter_main(argv=sys.argv):
+    parser = optparse.OptionParser(usage="usage: zenmaster [options]")
+    parser.add_option("--rescue",
+                      dest="rescue", action="store_true", default=False,
+                      help="enable ros rescue for fault tolerance.")
+
+    options, args = parser.parse_args(argv[1:])
+    rescue = False
+    if options.rescue:
+        rescue = True
+
     print("ROS MONITOR STARTED")
     rospy.init_node("rosmaster_monitor", anonymous=True)
 
     #create the RosMaster Monitor Object to keep track of the master and restart when needed
-    ros_mon = RosMasterMonitor(MASTER_CHECK_INTERVAL)
+    ros_mon = RosMasterMonitor(MASTER_CHECK_INTERVAL, rescue)
     ros_mon.start()
     rospy.spin()
