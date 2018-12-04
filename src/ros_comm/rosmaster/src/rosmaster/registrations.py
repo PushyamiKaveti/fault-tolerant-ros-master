@@ -410,7 +410,7 @@ class RegistrationManager(object):
 
         # Pushyami : Save the latest registration
         if self.rescue_opt:
-            print("In register of topic:" + key + "caller id: " + caller_id)
+            #print("In register of topic:" + key + "caller id: " + caller_id)
             self.rescue_obj.saveState()
 
         
@@ -428,7 +428,7 @@ class RegistrationManager(object):
 
         # Pushyami : Save the latest registration info
         if self.rescue_opt:
-            print("In UNregister of topic:" + key + "caller id: " + caller_id)
+            #print("In UNregister of topic:" + key + "caller id: " + caller_id)
             self.rescue_obj.saveState()
 
         return retval

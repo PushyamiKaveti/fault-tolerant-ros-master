@@ -34,7 +34,7 @@ class RosRescue(object):
 
     def __init__(self , regman):
         global CHKPT_PATH
-        print("rescue Object created")
+        print("ROSRescue ENABLED")
         env = os.environ
         log_dir = rospkg.get_log_dir(env=env)
         CHKPT_PATH = os.path.join(log_dir, "latest-chkpt.yaml")
@@ -115,7 +115,7 @@ class RosRescue(object):
                 proxy = ServerProxy(uri)
                 proxy.getName("/master")
                 live_nodes[caller_id] = proxy
-                print("live node : "+ caller_id)
+                #print("live node : "+ caller_id)
             except Fault as e:
                 print ("Fault code: %d" % e.faultCode)
                 print ("Fault string: %s" % e.faultString)
@@ -126,12 +126,12 @@ class RosRescue(object):
                 print "Error code: %d" % e.errcode
                 print "Error message: %s" % e.errmsg
             except Exception as e:
-                print ("Node :"+caller_id+"Has died")
+                print ("[ROSRESCUE INFO] Node :"+caller_id+" has died")
         return live_nodes
 
 
     def recover_master( self, reg_typ , reg_map , live_nodes):
-        print("REGISTRATION TYPE:" + reg_typ)
+        #print("REGISTRATION TYPE:" + reg_typ)
         temp_map = reg_map
         reg_func=None
 
@@ -154,7 +154,7 @@ class RosRescue(object):
         elif reg_typ == RosRescue.SERVICES:
             reg_func = self.regman.register_service
         else :
-            print("Not supported")
+            print("")
             return
 
         for t, caller_tup_list in temp_map.items():
@@ -173,9 +173,9 @@ class RosRescue(object):
                     if t in [ tname for [tname,ttype] in pubs] :
                         reg_func(t, caller_tup[0], caller_tup[1])
                     else :
-                        print("Node "+caller_tup[0]+ "does not have topic "+t+"Any more")
+                        print("[ROSRESCUE INFO] Node "+caller_tup[0]+ "does not have topic "+t+"any more")
                 else :
-                    print("Node "+caller_tup[0]+" is NO More")
+                    print("[ROSRESCUE INFO] Node "+caller_tup[0]+" is No More")
         return
 
     def getLastSavedState(self):

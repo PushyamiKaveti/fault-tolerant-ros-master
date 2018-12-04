@@ -105,7 +105,7 @@ class RosMasterMonitor(object):
         if not rospy.is_shutdown() :
             #see if the master is still running
             if not self.is_master_alive() :
-                print("MASTER FAILURE DETECTED. Restarting the Master")
+                print("************************MASTER FAILURE DETECTED. Restarting the Master******************")
                 if not self.restart_rosmaster():
                     return
 
@@ -125,7 +125,7 @@ def ros_moniter_main(argv=sys.argv):
     if options.rescue:
         rescue = True
 
-    print("ROS MONITOR STARTED")
+    print("***********ROS MONITOR STARTED*****************")
     rospy.init_node("rosmaster_monitor", anonymous=True)
 
     #create the RosMaster Monitor Object to keep track of the master and restart when needed
