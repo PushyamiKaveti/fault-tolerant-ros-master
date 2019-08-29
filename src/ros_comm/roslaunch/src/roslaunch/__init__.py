@@ -181,6 +181,11 @@ def _get_optparse():
                       dest="timeout",
                       help="override the socket connection timeout (in seconds). Only valid for core services.", metavar="TIMEOUT")
 
+    # Pushyami : add an option in the master to enable rosrescue. check
+    parser.add_option("--rescue",
+                      dest="rescue", action="store_true", default=None,
+                      help="enable ros rescue for fault tolerance.")
+
     return parser
     
 def _validate_args(parser, options, args):
@@ -220,9 +225,11 @@ def main(argv=sys.argv):
     try:
         from . import rlutil
         parser = _get_optparse()
-        
+        print("#########################################################################################")
+        print(argv[1:])
         (options, args) = parser.parse_args(argv[1:])
         args = rlutil.resolve_launch_arguments(args)
+        print(args)
         _validate_args(parser, options, args)
 
         # node args doesn't require any roslaunch infrastructure, so process it first
@@ -299,10 +306,15 @@ def main(argv=sys.argv):
             # force a port binding spec if we are running a core
             if options.core:
                 options.port = options.port or DEFAULT_MASTER_PORT
+            rescue = None
+            if options.rescue:
+                rescue= options.rescue
+            # Pushyami : added a argument in the following constructor for rescue option
             p = roslaunch_parent.ROSLaunchParent(uuid, args, roslaunch_strs=roslaunch_strs,
-                    is_core=options.core, port=options.port, local_only=options.local_only,
-                    verbose=options.verbose, force_screen=options.force_screen,
-                    num_workers=options.num_workers, timeout=options.timeout)
+                                                 is_core=options.core, port=options.port, local_only=options.local_only,
+                                                 verbose=options.verbose, force_screen=options.force_screen,
+                                                 num_workers=options.num_workers, timeout=options.timeout,
+                                                 rescue=rescue)
             p.start()
             p.spin()
 

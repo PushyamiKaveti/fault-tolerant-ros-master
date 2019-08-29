@@ -56,6 +56,10 @@ def _get_optparse():
     parser.add_option("-t", "--timeout",
                       dest="timeout",
                       help="override the socket connection timeout (in seconds).", metavar="TIMEOUT")
+    # Pushyami : add an option in the master to enable rosrescue
+    parser.add_option("--rescue",
+                      dest="rescue", action="store_true", default=False,
+                      help="enable ros rescue for fault tolerance.")
     return parser
 
 

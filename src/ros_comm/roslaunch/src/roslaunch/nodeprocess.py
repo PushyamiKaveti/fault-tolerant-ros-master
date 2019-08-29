@@ -63,7 +63,8 @@ def _next_counter():
     _counter += 1
     return _counter
 
-def create_master_process(run_id, type_, ros_root, port, num_workers=NUM_WORKERS, timeout=None):
+#Pushyami: added rescue option
+def create_master_process(run_id, type_, ros_root, port, num_workers=NUM_WORKERS, timeout=None, rescue=None):
     """
     Launch a master
     @param type_: name of master executable (currently just Master.ZENMASTER)
@@ -90,6 +91,9 @@ def create_master_process(run_id, type_, ros_root, port, num_workers=NUM_WORKERS
         args = [master, '--core', '-p', str(port), '-w', str(num_workers)]
         if timeout is not None:
             args += ['-t', str(timeout)]
+        #Pushyami : added rescue option
+        if rescue is not None:
+            args += ['--rescue']
     else:
         raise RLException("unknown master typ_: %s"%type_)
 

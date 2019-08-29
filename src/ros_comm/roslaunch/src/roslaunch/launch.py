@@ -234,8 +234,8 @@ class ROSLaunchRunner(object):
     allows the main thread to continue to do work while processes are
     monitored.
     """
-    
-    def __init__(self, run_id, config, server_uri=None, pmon=None, is_core=False, remote_runner=None, is_child=False, is_rostest=False, num_workers=NUM_WORKERS, timeout=None):
+    #Pushyami Kaveti: added rescue option
+    def __init__(self, run_id, config, server_uri=None, pmon=None, is_core=False, remote_runner=None, is_child=False, is_rostest=False, num_workers=NUM_WORKERS, timeout=None, rescue=None):
         """
         @param run_id: /run_id for this launch. If the core is not
             running, this value will be used to initialize /run_id. If
@@ -281,6 +281,10 @@ class ROSLaunchRunner(object):
         self.is_rostest = is_rostest
         self.num_workers = num_workers
         self.timeout = timeout
+
+        #Pushyami : added rescue option
+        self.rescue=rescue
+
         self.logger = logging.getLogger('roslaunch')
         self.pm = pmon or start_process_monitor()
 
@@ -395,9 +399,9 @@ class ROSLaunchRunner(object):
 
         if not is_running:
             validate_master_launch(m, self.is_core, self.is_rostest)
-
+            #Pushyami : added rescue option to create node process
             printlog("auto-starting new master")
-            p = create_master_process(self.run_id, m.type, get_ros_root(), m.get_port(), self.num_workers, self.timeout)
+            p = create_master_process(self.run_id, m.type, get_ros_root(), m.get_port(), self.num_workers, self.timeout, self.rescue)
             self.pm.register_core_proc(p)
             success = p.start()
             if not success:
