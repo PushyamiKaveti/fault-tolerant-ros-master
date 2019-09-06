@@ -31,14 +31,17 @@ class RosRescue(object):
     SERVICES = "SERVICES"
     PARAM_SUBSCRIBERS = "PARAM_SUBSCRIBERS"
     NODES = "NODES"
+    PARAMETERS = "PARAMS"
 
-    def __init__(self , regman):
+    def __init__(self , regman, param_server):
         global CHKPT_PATH
         print("ROSRescue ENABLED")
         env = os.environ
         log_dir = rospkg.get_log_dir(env=env)
         CHKPT_PATH = os.path.join(log_dir, "latest-chkpt.yaml")
         self.regman = regman
+        self.param_server = param_server
+        self.parameters = param_server.parameters
         self.recovering= False
         return
 
@@ -80,11 +83,19 @@ class RosRescue(object):
     def registration_parser(self, regman):
         data=[]
         data.append(self.nodes_to_yaml_dict(regman.nodes))
+        data.append(self.params_to_yaml_dict())
         data.append(self.to_yaml_dict(regman.publishers))
         data.append(self.to_yaml_dict(regman.subscribers))
         data.append(self.to_yaml_dict(regman.param_subscribers))
         data.append(self.to_yaml_dict(regman.services))
         return data
+
+    def params_to_yaml_dict(self):
+        parameter_dict = {RosRescue.PARAMETERS : self.parameters}
+        return parameter_dict
+
+    def update_params(self):
+        self.parameters = self.param_server.parameters
 
     """ 
     Method which saves the state of the Master Registrations 
@@ -153,29 +164,39 @@ class RosRescue(object):
             reg_func = self.regman.register_subscriber
         elif reg_typ == RosRescue.SERVICES:
             reg_func = self.regman.register_service
+        elif reg_typ == RosRescue.PARAMETERS:
+            reg_func = self.param_server.set_param
+        elif reg_typ == RosRescue.PARAM_SUBSCRIBERS:
+            print("This requires the subscribe param to be functioning and Parametercache to be enabled")
         else :
             print("")
             return
 
         for t, caller_tup_list in temp_map.items():
-            for caller_tup in caller_tup_list:
-                #check if the caller id exists in the live live_nodes
-                proxy = live_nodes.get(caller_tup[0], None)
-                if proxy is not None :
-                    if reg_typ == RosRescue.PUBLISHERS :
-                        code, _, pubs = proxy.getPublications('/master')
-                    elif reg_typ == RosRescue.SUBSCRIBERS :
-                        code, _, pubs = proxy.getSubscriptions('/master')
-                    elif reg_typ == RosRescue.SERVICES :
-                        reg_func(t, caller_tup[0], caller_tup[1], caller_tup[2])
-                        continue
-
-                    if t in [ tname for [tname,ttype] in pubs] :
-                        reg_func(t, caller_tup[0], caller_tup[1])
-                    else :
-                        print("[ROSRESCUE INFO] Node "+caller_tup[0]+ "does not have topic "+t+"any more")
+            if type(caller_tup_list) != list and reg_typ == RosRescue.PARAMETERS :
+                if (t == 'rosdistro' or t ==  'rosversion' or t == "run_id" or t == "roslaunch") :
+                    continue
                 else :
-                    print("[ROSRESCUE INFO] Node "+caller_tup[0]+" is No More")
+                    reg_func(t, caller_tup_list)
+            else :
+                for caller_tup in caller_tup_list:
+                    #check if the caller id exists in the live live_nodes
+                    proxy = live_nodes.get(caller_tup[0], None)
+                    if proxy is not None :
+                        if reg_typ == RosRescue.PUBLISHERS :
+                            code, _, pubs = proxy.getPublications('/master')
+                        elif reg_typ == RosRescue.SUBSCRIBERS :
+                            code, _, pubs = proxy.getSubscriptions('/master')
+                        elif reg_typ == RosRescue.SERVICES :
+                            reg_func(t, caller_tup[0], caller_tup[1], caller_tup[2])
+                            continue
+
+                        if t in [ tname for [tname,ttype] in pubs] :
+                            reg_func(t, caller_tup[0], caller_tup[1])
+                        else :
+                            print("[ROSRESCUE INFO] Node "+caller_tup[0]+ "does not have topic "+t+"any more")
+                    else :
+                        print("[ROSRESCUE INFO] Node "+caller_tup[0]+" is No More")
         return
 
     def getLastSavedState(self):

@@ -37,7 +37,7 @@ from rosmaster.util import xmlrpcapi
 import rosmaster.exceptions
 
 # Pushyami : import RosRescue
-from rosmaster.rosrescue import RosRescue
+#from rosmaster.rosrescue import RosRescue
 
 """Data structures for representing registration data in the Master"""
 
@@ -356,7 +356,7 @@ class RegistrationManager(object):
 
     # Pushyami : change to init of RegistrationManager of master to enable rescue
     # main state saving code is written here for the master
-    def __init__(self, thread_pool, rescue=False):
+    def __init__(self, thread_pool):
         """
         ctor.
         @param thread_pool: thread pool for queueing tasks
@@ -371,11 +371,11 @@ class RegistrationManager(object):
         self.param_subscribers = Registrations(Registrations.PARAM_SUBSCRIPTIONS)
 
         # Pushyami : Create RosRescue Object
-        self.rescue_opt = rescue
+        #self.rescue_opt = rescue
 
-        if self.rescue_opt:
-            self.rescue_obj = RosRescue(self)
-            self.rescue_obj.getLastSavedState()
+        #if self.rescue_opt:
+        #    self.rescue_obj = RosRescue(self)
+        #    self.rescue_obj.getLastSavedState()
 
     
     def reverse_lookup(self, caller_api):
@@ -408,11 +408,6 @@ class RegistrationManager(object):
             self.param_subscribers.unregister_all(caller_id)
         r.register(key, caller_id, caller_api, service_api)
 
-        # Pushyami : Save the latest registration
-        if self.rescue_opt:
-            #print("In register of topic:" + key + "caller id: " + caller_id)
-            self.rescue_obj.saveState()
-
         
     def _unregister(self, r, key, caller_id, caller_api, service_api=None):
         node_ref = self.nodes.get(caller_id, None)
@@ -425,11 +420,6 @@ class RegistrationManager(object):
                 del self.nodes[caller_id]
         else:
             retval = 1, "[%s] is not a registered node"%caller_id, 0
-
-        # Pushyami : Save the latest registration info
-        if self.rescue_opt:
-            #print("In UNregister of topic:" + key + "caller id: " + caller_id)
-            self.rescue_obj.saveState()
 
         return retval
     

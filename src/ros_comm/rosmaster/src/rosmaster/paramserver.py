@@ -285,7 +285,7 @@ class ParamDictionary(object):
                     raise KeyError(key)
                 else:
                     del d[value_key]
-                    
+
                 # ParamDictionary needs to queue updates so that the updates are thread-safe
                 if notify_task:
                     updates = compute_param_updates(self.reg_manager.param_subscribers, key, {})

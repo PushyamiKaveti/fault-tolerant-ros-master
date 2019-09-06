@@ -73,6 +73,9 @@ from rosmaster.util import xmlrpcapi
 from rosmaster.registrations import RegistrationManager
 from rosmaster.validators import non_empty, non_empty_str, not_none, is_api, is_topic, is_service, valid_type_name, valid_name, empty_or_valid_name, ParameterInvalid
 
+# Pushyami : import RosRescue
+from rosmaster.rosrescue import RosRescue
+
 NUM_WORKERS = 3 #number of threads we use to send publisher_update notifications
 
 # Return code slots
@@ -258,7 +261,7 @@ class ROSMasterHandler(object):
         self.ps_lock = threading.Condition(threading.Lock())
 
         # Pushyami : change to Registration Manager of master to enable rescue
-        self.reg_manager = RegistrationManager(self.thread_pool, rescue)
+        self.reg_manager = RegistrationManager(self.thread_pool)
 
         # maintain refs to reg_manager fields
         self.publishers  = self.reg_manager.publishers
@@ -270,6 +273,14 @@ class ROSMasterHandler(object):
 
         # parameter server dictionary
         self.param_server = rosmaster.paramserver.ParamDictionary(self.reg_manager)
+
+        # Pushyami : Create RosRescue Object
+        self.rescue_opt = rescue
+
+        if self.rescue_opt:
+            self.rescue_obj = RosRescue(self.reg_manager , self.param_server)
+            self.rescue_obj.getLastSavedState()
+
 
     def _shutdown(self, reason=''):
         if self.thread_pool is not None:
@@ -349,6 +360,13 @@ class ROSMasterHandler(object):
         try:
             key = resolve_name(key, caller_id)
             self.param_server.delete_param(key, self._notify_param_subscribers)
+
+            # Pushyami : save state when a new param is deleted
+            if self.rescue_opt:
+                # print("In register of topic:" + key + "caller id: " + caller_id)
+                self.rescue_obj.update_params()
+                self.rescue_obj.saveState()
+
             mloginfo("-PARAM [%s] by %s",key, caller_id)            
             return  1, "parameter %s deleted"%key, 0                
         except KeyError as e:
@@ -378,6 +396,13 @@ class ROSMasterHandler(object):
         """
         key = resolve_name(key, caller_id)
         self.param_server.set_param(key, value, self._notify_param_subscribers)
+
+        # Pushyami : save state when a new param is set
+        if self.rescue_opt:
+            # print("In register of topic:" + key + "caller id: " + caller_id)
+            self.rescue_obj.update_params()
+            self.rescue_obj.saveState()
+
         mloginfo("+PARAM [%s] by %s",key, caller_id)
         return 1, "parameter %s set"%key, 0
 
@@ -462,6 +487,11 @@ class ROSMasterHandler(object):
             # potential self.reg_manager modification
             self.ps_lock.acquire()
             val = self.param_server.subscribe_param(key, (caller_id, caller_api))
+
+            # Pushyami : Save the latest registration
+            if self.rescue_opt:
+                # print("In register of topic:" + key + "caller id: " + caller_id)
+                self.rescue_obj.saveState()
         finally:
             self.ps_lock.release()
         return 1, "Subscribed to parameter [%s]"%key, val
@@ -486,6 +516,11 @@ class ROSMasterHandler(object):
             # ps_lock is required due to potential self.reg_manager modification
             self.ps_lock.acquire()
             retval = self.param_server.unsubscribe_param(key, (caller_id, caller_api))
+
+            # Pushyami : Save the latest registration
+            if self.rescue_opt:
+                # print("In register of topic:" + key + "caller id: " + caller_id)
+                self.rescue_obj.saveState()
         finally:
             self.ps_lock.release()
         return 1, "Unsubscribe to parameter [%s]"%key, 1
@@ -620,6 +655,10 @@ class ROSMasterHandler(object):
         try:
             self.ps_lock.acquire()
             self.reg_manager.register_service(service, caller_id, caller_api, service_api)
+            # Pushyami : Save the latest registration
+            if self.rescue_opt:
+                # print("In register of topic:" + key + "caller id: " + caller_id)
+                self.rescue_obj.saveState()
             mloginfo("+SERVICE [%s] %s %s", service, caller_id, caller_api)
         finally:
             self.ps_lock.release()
@@ -666,6 +705,10 @@ class ROSMasterHandler(object):
         try:
             self.ps_lock.acquire()
             retval = self.reg_manager.unregister_service(service, caller_id, service_api)
+            # Pushyami : Save the latest registration
+            if self.rescue_opt:
+                # print("In register of topic:" + key + "caller id: " + caller_id)
+                self.rescue_obj.saveState()
             mloginfo("-SERVICE [%s] %s %s", service, caller_id, service_api)
             return retval
         finally:
@@ -695,6 +738,10 @@ class ROSMasterHandler(object):
         try:
             self.ps_lock.acquire()
             self.reg_manager.register_subscriber(topic, caller_id, caller_api)
+            # Pushyami : Save the latest registration
+            if self.rescue_opt:
+                # print("In register of topic:" + key + "caller id: " + caller_id)
+                self.rescue_obj.saveState()
 
             # ROS 1.1: subscriber can now set type if it is not already set
             #  - don't let '*' type squash valid typing
@@ -726,6 +773,10 @@ class ROSMasterHandler(object):
         try:
             self.ps_lock.acquire()
             retval = self.reg_manager.unregister_subscriber(topic, caller_id, caller_api)
+            # Pushyami : Save the latest registration
+            if self.rescue_opt:
+                # print("In register of topic:" + key + "caller id: " + caller_id)
+                self.rescue_obj.saveState()
             mloginfo("-SUB [%s] %s %s",topic, caller_id, caller_api)
             return retval
         finally:
@@ -752,6 +803,10 @@ class ROSMasterHandler(object):
         try:
             self.ps_lock.acquire()
             self.reg_manager.register_publisher(topic, caller_id, caller_api)
+            # Pushyami : Save the latest registration
+            if self.rescue_opt:
+                # print("In register of topic:" + key + "caller id: " + caller_id)
+                self.rescue_obj.saveState()
             # don't let '*' type squash valid typing
             if topic_type != rosgraph.names.ANYTYPE or not topic in self.topics_types:
                 self.topics_types[topic] = topic_type
@@ -785,6 +840,11 @@ class ROSMasterHandler(object):
         try:
             self.ps_lock.acquire()
             retval = self.reg_manager.unregister_publisher(topic, caller_id, caller_api)
+            # Pushyami : Save the latest registration
+            if self.rescue_opt:
+                # print("In register of topic:" + key + "caller id: " + caller_id)
+                self.rescue_obj.saveState()
+
             if retval[VAL]:
                 self._notify_topic_subscribers(topic, self.publishers.get_apis(topic), self.subscribers.get_apis(topic))
             mloginfo("-PUB [%s] %s %s",topic, caller_id, caller_api)

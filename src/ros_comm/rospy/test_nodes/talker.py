@@ -40,7 +40,9 @@ from std_msgs.msg import String
 def talker():
     rospy.init_node('talker', anonymous=True)
     pub = rospy.Publisher('chatter', String, queue_size=10)
+    p = rospy.get_param("talker")
     r = rospy.Rate(10) # 10hz
+
     while not rospy.is_shutdown():
         str = "hello world %s"%rospy.get_time()
         rospy.loginfo(str)
