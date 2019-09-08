@@ -10,4 +10,7 @@
     <param name="rosdistro" command="rosversion -d" />
     <node pkg="rosout" type="rosout" name="rosout" respawn="true"/>
   </group>
+   <group ns="/">
+    <node pkg="rosmaster" type="master_monitor" name="master_monitor" args="--rescue" respawn="true"/>
+  </group>
 </launch>
