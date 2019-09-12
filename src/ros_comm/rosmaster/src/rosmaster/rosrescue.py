@@ -106,7 +106,7 @@ class RosRescue(object):
             data = self.registration_parser(self.regman)
             yaml.dump_all(data, outfile, default_flow_style=False, allow_unicode=True)
         outfile.close()
-        print("Ros Rescue saved the Master state")
+        #print("Ros Rescue saved the Master state")
         return
 
     def loadState(self):
@@ -137,7 +137,8 @@ class RosRescue(object):
                 print "Error code: %d" % e.errcode
                 print "Error message: %s" % e.errmsg
             except Exception as e:
-                print ("[ROSRESCUE INFO] Node :"+caller_id+" has died")
+                pass
+               # print ("[ROSRESCUE INFO] Node :"+caller_id+" has died")
         return live_nodes
 
 
@@ -166,8 +167,8 @@ class RosRescue(object):
             reg_func = self.regman.register_service
         elif reg_typ == RosRescue.PARAMETERS:
             reg_func = self.param_server.set_param
-        elif reg_typ == RosRescue.PARAM_SUBSCRIBERS:
-            print("This requires the subscribe param to be functioning and Parametercache to be enabled")
+        #elif reg_typ == RosRescue.PARAM_SUBSCRIBERS:
+            #print("This requires the subscribe param to be functioning and Parametercache to be enabled")
         else :
             print("")
             return
@@ -193,10 +194,10 @@ class RosRescue(object):
 
                         if t in [ tname for [tname,ttype] in pubs] :
                             reg_func(t, caller_tup[0], caller_tup[1])
-                        else :
-                            print("[ROSRESCUE INFO] Node "+caller_tup[0]+ "does not have topic "+t+"any more")
-                    else :
-                        print("[ROSRESCUE INFO] Node "+caller_tup[0]+" is No More")
+                        #else :
+                            #print("[ROSRESCUE INFO] Node "+caller_tup[0]+ "does not have topic "+t+"any more")
+                    #else :
+                        #print("[ROSRESCUE INFO] Node "+caller_tup[0]+" is No More")
         return
 
     def getLastSavedState(self):

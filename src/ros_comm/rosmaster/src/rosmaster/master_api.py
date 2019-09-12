@@ -279,7 +279,13 @@ class ROSMasterHandler(object):
 
         if self.rescue_opt:
             self.rescue_obj = RosRescue(self.reg_manager , self.param_server)
+            import time
+            s = time.time()
             self.rescue_obj.getLastSavedState()
+            e = time.time()
+            print("time to recover :")
+            print(e - s)
+
 
 
     def _shutdown(self, reason=''):
