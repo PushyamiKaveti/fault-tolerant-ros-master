@@ -44,7 +44,7 @@ By default logs are saved in “ ~/.ros/log/latest-chkpt.yaml” with the system
 
 If the ros master is running with fault tolerance enabled you should see “Ros Rescue enabled. Master is now fault tolerant!!!” printed to the console where roscore --rescue was executed as shown in the figure below. Another check that can be done is to make sure the master state is being saved to latest-ckhpt.yaml file mentioned above.
 
-<img src="docs/images/output.png" alt="fault-tolerant master output" width="640" align="middle">
+<img src="imgs/output.png" alt="fault-tolerant master output" width="640" align="middle">
 
 
 
