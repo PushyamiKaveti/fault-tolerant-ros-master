@@ -58,6 +58,10 @@ def configure_logging():
     _log_filename = rosgraph.roslogging.configure_logging('rosmaster', logging.DEBUG, filename=filename)
 
 def rosmaster_main(argv=sys.argv, stdout=sys.stdout, env=os.environ):
+    import time
+    #starting time of rosd master start
+    begin = time.time()
+
     parser = optparse.OptionParser(usage="usage: zenmaster [options]")
     parser.add_option("--core",
                       dest="core", action="store_true", default=False,
@@ -122,7 +126,10 @@ WARNING ACHTUNG WARNING ACHTUNG WARNING
         master = rosmaster.master.Master(port, options.num_workers, options.rescue)
         master.start()
 
-        import time
+        end = time.time()
+        print("----------Time FOR MASTER START ---------- :")
+        print(end - begin)
+
         while master.ok():
             time.sleep(.1)
     except KeyboardInterrupt:

@@ -2,6 +2,18 @@
 Changelog for package rosbash
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+1.14.6 (2019-03-18)
+-------------------
+* add roscd, rosls support for Windows (`#210 <https://github.com/ros/ros/issues/210>`_)
+* exclude files when completing roslaunch args (`#211 <https://github.com/ros/ros/issues/211>`_)
+
+1.14.5 (2019-03-04)
+-------------------
+* add rosrun.bat (`#208 <https://github.com/ros/ros/issues/208>`_)
+* add verbose output to rosrun if catkin_find fails (`#182 <https://github.com/ros/ros/issues/182>`_)
+* add missing rospack dependency (`#189 <https://github.com/ros/ros/issues/189>`_)
+* fix rosfish (`#172 <https://github.com/ros/ros/issues/172>`_)
+
 1.14.4 (2018-05-01)
 -------------------
 * rosrun: array is now properly expanded in debug-echo (`#176 <https://github.com/ros/ros/issues/176>`_)

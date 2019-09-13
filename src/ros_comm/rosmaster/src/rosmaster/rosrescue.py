@@ -201,6 +201,8 @@ class RosRescue(object):
         return
 
     def getLastSavedState(self):
+        import time
+        s = time.time()
         self.recovering = True
         if os.path.exists(CHKPT_PATH):
             with open(CHKPT_PATH) as f:
@@ -212,6 +214,9 @@ class RosRescue(object):
                             live_nodes = self.get_live_nodes(v)
                         else :
                             self.recover_master(k , v, live_nodes)
+            e = time.time()
+            print("---------Time to recover previous state --------:")
+            print(e - s)
             self.saveState()
         return
 

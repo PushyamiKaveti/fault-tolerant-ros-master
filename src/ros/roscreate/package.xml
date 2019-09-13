@@ -1,6 +1,6 @@
 <package>
   <name>roscreate</name>
-  <version>1.14.4</version>
+  <version>1.14.6</version>
   <description>
      roscreate contains a tool that assists in the creation of ROS filesystem resources.
      It provides: <tt>roscreate-pkg</tt>, which creates a new package directory,
@@ -16,4 +16,5 @@
   <buildtool_depend version_gte="0.5.68">catkin</buildtool_depend>
 
   <run_depend>python-rospkg</run_depend>
+  <run_depend>roslib</run_depend>
 </package>

@@ -283,7 +283,7 @@ class ROSMasterHandler(object):
             s = time.time()
             self.rescue_obj.getLastSavedState()
             e = time.time()
-            print("time to recover :")
+            print("---------Time to recover previous state + writing updated state--------:")
             print(e - s)
 
 
