@@ -1,8 +1,8 @@
-#Installation Instructions
+# Installation Instructions
 
 Guidelines for building , testing and implementing ROS Rescue in custom ROS applications.Ros Rescue is included as an additional functionality inside rosmaster package for light-weight implementation. We have implemented the rescue feature in the source code of ROS which is available on this repository.
 
-##System setup
+## System setup
 
 We need to prepare the system to execute  roscore with rescue feature enabled , as a first step we make sure to have the prerequisites. Open the terminal and execute the following commands which take cares of python dependencies, initialize the ros dependencies and update the ros dependency packages.
 
@@ -32,7 +32,7 @@ Also, the environment setup file has the list of environment variables which req
 ```bash
 $ source ros_env_setup.sh
 ```
-##Running ROS Rescue
+## Running ROS Rescue
 
 Once the environment is setup as per above section, now it’s time to run the roscore with rescue feature. ROS master with our rescue option will function and operate in the same fashion with additional capabilities of the logging and rescue. Only change is to initiate the roscore with “--rescue” option as seen below.
 
@@ -65,7 +65,7 @@ $ python  talker.py
 $ python listener.py
 ```
 
-#DEMO VIDEOS
+# DEMO VIDEOS
 
 ROS with NO RESCUE : https://drive.google.com/drive/u/0/folders/11pLmd_hokq_K0R9v2zF1Asrwg2D4Yxen
 ROS with Fault-tolerance : https://drive.google.com/drive/u/0/folders/11pLmd_hokq_K0R9v2zF1Asrwg2D4Yxen
